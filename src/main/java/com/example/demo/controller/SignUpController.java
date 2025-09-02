@@ -22,15 +22,21 @@ public class SignUpController {
 
     @PostMapping("/signin")
     public ResponseEntity<String> signin(@RequestBody User user) {
-        System.out.println(user);
-        userService.saveUser(user);
+        String response = userService.saveUser(user);
+
+        if (response.startsWith("User already exists")) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT) // 409
+                    .body(response);
+        }
+
         return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body("New user created successfully");
+                .status(HttpStatus.CREATED) // 201
+                .body(response);
     }
 
     @GetMapping("/users")
-    public List<User> getUsers(){
+    public List<User> getUsers() {
         return userService.getUsers();
     }
 }
