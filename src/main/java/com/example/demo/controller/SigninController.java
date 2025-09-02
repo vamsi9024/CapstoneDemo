@@ -1,6 +1,5 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.AuthResponse;
 import com.example.demo.model.User;
 import com.example.demo.service.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,15 +22,21 @@ public class SigninController {
 
     @PostMapping("/signin")
     public ResponseEntity<String> signin(@RequestBody User user) {
-        System.out.println(user);
-        userService.saveUser(user);
+        String response = userService.saveUser(user);
+
+        if (response.startsWith("User already exists")) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT) // 409
+                    .body(response);
+        }
+
         return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body("New user created successfully");
+                .status(HttpStatus.CREATED) // 201
+                .body(response);
     }
 
     @GetMapping("/users")
-    public List<User> getUsers(){
+    public List<User> getUsers() {
         return userService.getUsers();
     }
 }
