@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 
 import com.example.demo.model.User;
+
 //import com.fasterxml.jackson.core.type.TypeReference;
 //import com.fasterxml.jackson.databind.ObjectMapper;
 //import org.springframework.stereotype.Service;
@@ -39,6 +40,7 @@ import com.example.demo.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -59,6 +61,10 @@ public class UserService {
     public Optional<User> findByUsername(String username) {
         return Optional.ofNullable(userRepository.findByUsername(username));
 
+    }
+
+    public List<User> getUsers() {
+        return userRepository.findAll();
     }
 
 }
