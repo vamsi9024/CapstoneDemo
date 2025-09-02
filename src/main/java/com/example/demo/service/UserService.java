@@ -37,7 +37,9 @@ import com.example.demo.model.User;
 //}
 import com.example.demo.repository.UserRepository;
 import org.springframework.stereotype.Service;
-import java.util.Optional;
+
+import java.util.List;
+
 
 @Service
 public class UserService {
@@ -56,5 +58,7 @@ public class UserService {
     // Find user by username
     public Optional<User> findByUsername(String username) {
         return Optional.ofNullable(userRepository.findByUsername(username));
+
     }
+
 }
