@@ -5,6 +5,7 @@ import com.example.demo.exception.GlobalExceptionHandler;
 import com.example.demo.exception.InvalidCredentialsException;
 import com.example.demo.model.AuthRequest;
 import com.example.demo.model.AuthResponse;
+import com.example.demo.model.User;
 import com.example.demo.service.TokenService;
 import com.example.demo.service.UserService;
 
@@ -51,7 +52,7 @@ public class LoginController {
 
     @Operation(summary = "Login and get JWT token")
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest req) {
+    public ResponseEntity<AuthResponse> login(@RequestBody User req) {
         log.info("Login attempt for username='{}'", req.getUsername());
 
         return userService.findByUsername(req.getUsername())
