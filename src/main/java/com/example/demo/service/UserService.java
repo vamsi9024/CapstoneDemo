@@ -34,7 +34,7 @@ public class UserService implements UserDetailsService{
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
         userRepository.save(user);
-        return "New user created successfully";
+        return "New user created successfully: " + user.getUsername();
     }
 
     public List<User> getUsers() {

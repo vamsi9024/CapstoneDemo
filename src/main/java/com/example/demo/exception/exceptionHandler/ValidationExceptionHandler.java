@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class ValidationExceptionHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginExceptionHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(ValidationExceptionHandler.class);
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ErrorResponse> handleApiException(
             ApiException ex,
