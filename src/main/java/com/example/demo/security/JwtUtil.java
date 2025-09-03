@@ -12,9 +12,11 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
+import static io.jsonwebtoken.Jwts.*;
+
 @Component
 public class JwtUtil {
-
+//
 //    private final Key key;
 //    private final long accessTokenExpirationMs;
 //
@@ -29,7 +31,7 @@ public class JwtUtil {
 //    public String generateToken(String username) {
 //        Date now = new Date();
 //        Date exp = new Date(now.getTime() + accessTokenExpirationMs);
-//        return Jwts.builder()
+//        return builder()
 //                .setSubject(username)
 //                .setIssuedAt(now)
 //                .setExpiration(exp)
@@ -51,7 +53,7 @@ public class JwtUtil {
 //    }
 //
 //    private Claims getAllClaims(String token) {
-//        return Jwts.parserBuilder().setSigningKey(key).build()
+//        return Jwts.parser().setSigningKey(key).build()
 //                .parseClaimsJws(token).getBody();
 //    }
 }
