@@ -73,7 +73,7 @@ public class LoginController {
                     return ResponseEntity.ok(new AuthResponse(token));
                 })
                 .orElseThrow(() ->
-                        new InvalidCredentialsException("Invalid username or password")
+                        new InvalidCredentialsException("User not registered")
                 );
     }
 
