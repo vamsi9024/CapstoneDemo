@@ -3,14 +3,12 @@ package com.example.demo.controller;
 
 import com.example.demo.exception.GlobalExceptionHandler;
 import com.example.demo.exception.InvalidCredentialsException;
-import com.example.demo.model.AuthRequest;
 import com.example.demo.model.AuthResponse;
 import com.example.demo.model.User;
 import com.example.demo.service.TokenService;
 import com.example.demo.service.UserService;
 
-import io.github.resilience4j.ratelimiter.RequestNotPermitted;
-import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -20,6 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
+
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 
 import java.util.Map;
 
@@ -38,41 +39,41 @@ public class LoginController {
         this.tokenService = tokenService;
     }
 
-//    @Operation(summary = "Login and get JWT token")
-//    @PostMapping("/login")
-//    public ResponseEntity<?> login(@RequestBody AuthRequest req) {
-//        return userService.findByUsername(req.getUsername())
-//                .filter(user -> user.getPassword().equals(req.getPassword()))
-//                .map(user -> {
-//                    String token = tokenService.generateToken(user.getUsername());
-//                    return ResponseEntity.ok(new AuthResponse(token));
-//                })
-//                .orElseGet(() ->
-//                        ResponseEntity
-//                                .status(HttpStatus.UNAUTHORIZED)
-//                                .body(new ErrorResponse("Invalid credentials"))
-//                );
-//    }
-
     @Operation(summary = "Login and get JWT token")
-    @RateLimiter(name = "loginRateLimiter", fallbackMethod = "rateLimitFallback")
     @PostMapping("/login")
+//    @CircuitBreaker(name = "loginService", fallbackMethod = "loginFallback")
+    @RateLimiter(name = "loginLimiter", fallbackMethod = "rateLimitFallback") // Add RateLimiter
     public ResponseEntity<?> login(@RequestBody User req) {
         log.info("Login attempt for username='{}'", req.getUsername());
 
         return userService.findByUsername(req.getUsername())
-                .filter(user -> user.getPassword().equals(req.getPassword()))
+                .filter(user -> {
+                    boolean valid = user.getPassword().equals(req.getPassword());
+                    if (!valid) {
+                        log.warn("Invalid credentials for username='{}'", req.getUsername());
+                    }
+                    return valid;
+                })
                 .map(user -> {
                     String token = tokenService.generateToken(user.getUsername());
+                    log.info("Login successful for username='{}'", user.getUsername());
                     return ResponseEntity.ok(new AuthResponse(token));
                 })
-                .orElseThrow(() -> new InvalidCredentialsException("Invalid username or password"));
+                .orElseThrow(() ->
+                        new InvalidCredentialsException("Invalid username or password")
+                );
     }
 
+    // --- RateLimiter fallback (too many login attempts) ---
     public ResponseEntity<?> rateLimitFallback(User req, RequestNotPermitted ex) {
+        log.warn("Rate limiter triggered for username='{}'", req.getUsername());
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
-                .body(Map.of("error", "Too many login attempts. Please try again in a few seconds."));
+                .body(Map.of("error", "Too many failed login attempts. Please try again later."));
     }
 
+//    public ResponseEntity<?> loginFallback(User req, Throwable t) {
+//        log.error("Circuit breaker fallback triggered for login username='{}'", req.getUsername(), t);
+//        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+//                .body(Map.of("error", "Login service temporarily unavailable. Please try again later."));
+//    }
 }
-

@@ -2700,8 +2700,8 @@ org.springframework.web.HttpRequestMethodNotSupportedException: Request method '
 2025-09-02 13:17:02.662 [http-nio-8080-exec-4] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
 2025-09-02 13:17:02.662 [http-nio-8080-exec-4] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
 2025-09-02 13:17:02.665 [http-nio-8080-exec-4] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 2 ms
-2025-09-02 13:17:02.701 [http-nio-8080-exec-4] ERROR c.e.d.e.e.LoginExceptionHandler - Unexpected error at /api/signin: Required request body is missing: public org.springframework.http.ResponseEntity<java.lang.String> com.example.demo.controller.SigninController.signin(com.example.demo.model.User)
-org.springframework.http.converter.HttpMessageNotReadableException: Required request body is missing: public org.springframework.http.ResponseEntity<java.lang.String> com.example.demo.controller.SigninController.signin(com.example.demo.model.User)
+2025-09-02 13:17:02.701 [http-nio-8080-exec-4] ERROR c.e.d.e.e.LoginExceptionHandler - Unexpected error at /api/signin: Required request body is missing: public org.springframework.http.ResponseEntity<java.lang.String> com.example.demo.controller.SignUpController.signin(com.example.demo.model.User)
+org.springframework.http.converter.HttpMessageNotReadableException: Required request body is missing: public org.springframework.http.ResponseEntity<java.lang.String> com.example.demo.controller.SignUpController.signin(com.example.demo.model.User)
 	at org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor.readWithMessageConverters(RequestResponseBodyMethodProcessor.java:179)
 	at org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor.resolveArgument(RequestResponseBodyMethodProcessor.java:150)
 	at org.springframework.web.method.support.HandlerMethodArgumentResolverComposite.resolveArgument(HandlerMethodArgumentResolverComposite.java:122)
@@ -4410,7 +4410,7 @@ org.springframework.orm.ObjectOptimisticLockingFailureException: Row was updated
 	at org.springframework.aop.framework.JdkDynamicAopProxy.invoke(JdkDynamicAopProxy.java:223)
 	at jdk.proxy2/jdk.proxy2.$Proxy138.save(Unknown Source)
 	at com.example.demo.service.UserService.saveUser(UserService.java:57)
-	at com.example.demo.controller.SigninController.signin(SigninController.java:27)
+	at com.example.demo.controller.SignUpController.signin(SigninController.java:27)
 	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
 	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
 	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:258)

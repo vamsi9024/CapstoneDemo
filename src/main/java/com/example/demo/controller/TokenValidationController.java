@@ -25,7 +25,7 @@ public class TokenValidationController {
     }
 
     @Operation(summary = "Validate JWT token")
-    @CircuitBreaker(name = "tokenValidator", fallbackMethod = "authFallback")
+//    @CircuitBreaker(name = "tokenValidator", fallbackMethod = "authFallback")
     @GetMapping("/auth")
     public ResponseEntity<String> auth(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -41,9 +41,9 @@ public class TokenValidationController {
         return ResponseEntity.ok("Authenticated as: " + username);
     }
 
-    public ResponseEntity<String> authFallback(String authHeader, Throwable t) {
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body("Authentication service is currently unavailable. Please try again in a few moments.");
-    }
+//    public ResponseEntity<String> authFallback(String authHeader, Throwable t) {
+//        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+//                .body("Authentication service is currently unavailable. Please try again in a few moments.");
+//    }
 
 }
