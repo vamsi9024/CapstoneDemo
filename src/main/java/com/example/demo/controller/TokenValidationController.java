@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.exception.ApiException;
 import com.example.demo.service.TokenService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
@@ -24,24 +25,25 @@ public class TokenValidationController {
     }
 
     @Operation(summary = "Validate JWT token")
+    @CircuitBreaker(name = "tokenValidator", fallbackMethod = "authFallback")
     @GetMapping("/auth")
-    public ResponseEntity<String> auth(
-            @RequestHeader(value = "Authorization", required = false) String authHeader) {
-
-        logger.info("Token validation request received");
+    public ResponseEntity<String> auth(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            logger.warn("Validation failed – missing or invalid Authorization header");
             throw new ApiException(HttpStatus.BAD_REQUEST, "Missing or invalid Authorization header");
         }
 
         String token = authHeader.substring(7);
         if (!tokenService.validateToken(token)) {
-            logger.warn("Validation failed – invalid or expired token");
             throw new ApiException(HttpStatus.UNAUTHORIZED, "Invalid or expired token");
         }
 
         String username = tokenService.getUsername(token);
-        logger.info("Token valid for user: {}", username);
         return ResponseEntity.ok("Authenticated as: " + username);
     }
+
+    public ResponseEntity<String> authFallback(String authHeader, Throwable t) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body("Authentication service is currently unavailable. Please try again in a few moments.");
+    }
+
 }

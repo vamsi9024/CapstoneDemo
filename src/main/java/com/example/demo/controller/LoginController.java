@@ -9,6 +9,8 @@ import com.example.demo.model.User;
 import com.example.demo.service.TokenService;
 import com.example.demo.service.UserService;
 
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -18,6 +20,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -51,26 +55,23 @@ public class LoginController {
 //    }
 
     @Operation(summary = "Login and get JWT token")
+    @RateLimiter(name = "loginRateLimiter", fallbackMethod = "rateLimitFallback")
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody User req) {
+    public ResponseEntity<?> login(@RequestBody User req) {
         log.info("Login attempt for username='{}'", req.getUsername());
 
         return userService.findByUsername(req.getUsername())
-                .filter(user -> {
-                    boolean valid = user.getPassword().equals(req.getPassword());
-                    if (!valid) {
-                        log.warn("Invalid credentials for username='{}'", req.getUsername());
-                    }
-                    return valid;
-                })
+                .filter(user -> user.getPassword().equals(req.getPassword()))
                 .map(user -> {
                     String token = tokenService.generateToken(user.getUsername());
-                    log.info("Login successful for username='{}'", user.getUsername());
                     return ResponseEntity.ok(new AuthResponse(token));
                 })
-                .orElseThrow(() ->
-                        new InvalidCredentialsException("Invalid username or password")
-                );
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid username or password"));
+    }
+
+    public ResponseEntity<?> rateLimitFallback(User req, RequestNotPermitted ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(Map.of("error", "Too many login attempts. Please try again in a few seconds."));
     }
 
 }
