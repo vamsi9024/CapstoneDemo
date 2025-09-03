@@ -30,4 +30,8 @@ public class UserService {
     public List<User> getUsers() {
         return userRepository.findAll();
     }
+    public Optional<User> findByUsername(String username) {
+        return Optional.ofNullable(userRepository.findByUsername(username));
+
+    }
 }
