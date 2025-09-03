@@ -1,18 +1,19 @@
 package com.example.demo.model;
 
 public class AuthResponse {
-    private String token;
+    private String accessToken;
+    private String refreshToken;
 
-    public AuthResponse(String token) {
-        this.token = token;
+    public AuthResponse(String accessToken, String refreshToken) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
     }
 
-    public String getToken() {
-        return token;
+    public String getAccessToken() {
+        return accessToken;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public String getRefreshToken() {
+        return refreshToken;
     }
 }
-

@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")
+
 @Tag(name = "Authentication – Login")
 public class LoginController {
 
@@ -68,14 +69,17 @@ public class LoginController {
                     return valid;
                 })
                 .map(user -> {
-                    String token = tokenService.generateToken(user.getUsername());
+                    String accessToken = tokenService.generateToken(user.getUsername());
+                    String refreshToken = tokenService.generateRefreshToken(user.getUsername());
                     log.info("Login successful for username='{}'", user.getUsername());
-                    return ResponseEntity.ok(new AuthResponse(token));
+                    return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken));
                 })
                 .orElseThrow(() ->
                         new InvalidCredentialsException("User not registered")
                 );
     }
+
+
 
 
 }

@@ -14,6 +14,7 @@ import java.util.Map;
 
 @RequestMapping("/api")
 @Tag(name = "New User – SignUp")
+
 @RestController
 public class SignUpController {
 
