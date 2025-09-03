@@ -22,7 +22,7 @@ import java.util.Map;
 public class LogoutController {
 
     private final TokenService tokenService;
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(LogoutController.class);
 
     public LogoutController(TokenService tokenService) {
         this.tokenService = tokenService;

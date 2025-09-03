@@ -17,7 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.web.ErrorResponse;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping("/api")
@@ -26,12 +28,14 @@ public class LoginController {
 
     private final UserService userService;
     private final TokenService tokenService;
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private final PasswordEncoder passwordEncoder;
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     public LoginController(UserService userService,
-                           TokenService tokenService) {
+                           TokenService tokenService , PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.tokenService = tokenService;
+        this.passwordEncoder = passwordEncoder;
     }
 
 //    @Operation(summary = "Login and get JWT token")
@@ -57,7 +61,7 @@ public class LoginController {
 
         return userService.findByUsername(req.getUsername())
                 .filter(user -> {
-                    boolean valid = user.getPassword().equals(req.getPassword());
+                    boolean valid = passwordEncoder.matches(req.getPassword(), user.getPassword());
                     if (!valid) {
                         log.warn("Invalid credentials for username='{}'", req.getUsername());
                     }
@@ -72,6 +76,7 @@ public class LoginController {
                         new InvalidCredentialsException("Invalid username or password")
                 );
     }
+
 
 }
 
