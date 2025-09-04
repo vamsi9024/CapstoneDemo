@@ -1,6 +1,7 @@
 package com.example.demo.exception;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 public class ErrorResponse {
     private LocalDateTime timestamp;
@@ -8,6 +9,7 @@ public class ErrorResponse {
     private String error;
     private String message;
     private String path;
+    private Map<String, String> details;
 
     public ErrorResponse() {}
 
@@ -17,6 +19,14 @@ public class ErrorResponse {
         this.error     = error;
         this.message   = message;
         this.path      = path;
+    }
+    public ErrorResponse(LocalDateTime timestamp, int status, String error, String message, String path, Map<String, String> details) {
+        this.timestamp = timestamp;
+        this.status    = status;
+        this.error     = error;
+        this.message   = message;
+        this.path      = path;
+        this.details = details;
     }
 
     public LocalDateTime getTimestamp() {
@@ -57,6 +67,14 @@ public class ErrorResponse {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public Map<String, String> getDetails() {
+        return details;
+    }
+
+    public void setDetails(Map<String, String> details) {
+        this.details = details;
     }
 }
 

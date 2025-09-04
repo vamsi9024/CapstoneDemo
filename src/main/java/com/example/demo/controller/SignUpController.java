@@ -24,8 +24,8 @@ public class SignUpController {
         this.userService = userService;
     }
 
-    @PostMapping("/signin")
-    public ResponseEntity<Map<String,String>> signin(@Valid @RequestBody User user) {
+    @PostMapping("/register")
+    public ResponseEntity<Map<String,String>> register(@Valid @RequestBody User user) {
         String response = userService.saveUser(user);
 
         if (response.startsWith("User already exists")) {
