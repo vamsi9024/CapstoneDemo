@@ -16,6 +16,10 @@ public class TokenService {
     private final SecretKey key;
     private final Set<String> validTokens = Collections.synchronizedSet(new HashSet<>());
     private final RefreshTokenRepository refreshTokenRepository;
+   // Expiry times
+    private static final long ACCESS_TOKEN_EXPIRY = 1000 * 60 * 15;   // 15 minutes
+    private static final long REFRESH_TOKEN_EXPIRY = 1000L * 60 * 60 * 24 * 7; // 7 days
+
 
     public TokenService(RefreshTokenRepository refreshTokenRepository) {
         this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
@@ -27,31 +31,55 @@ public class TokenService {
         String jwt = Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 3600_000)) // 1 hour expiry
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
                 .signWith(key)
                 .compact();
 
         validTokens.add(jwt);
         return jwt;
     }
+    // generate refresh token and save
+    public RefreshToken createRefreshToken(String username) {
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setToken(UUID.randomUUID().toString());
+        refreshToken.setUsername(username);
+        refreshToken.setExpiryDate(Instant.now().plusSeconds(86400)); // 1 day
 
-    // Validate token signature and check if token is stored (not logged out)
-    public boolean isTokenValid(String token) {
-        if (!validTokens.contains(token)) {
-            return false;
-        }
+        return refreshTokenRepository.save(refreshToken);
+    }
+    public String generateRefreshToken(String username) {
+        String refreshToken = Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRY))
+                .signWith(key)
+                .compact();
 
+        // save in DB for extra security
+        storeRefreshToken(username, refreshToken);
+
+        return refreshToken;
+    }
+
+    // Store refresh token in DB
+    public void storeRefreshToken(String username, String refreshToken) {
+        RefreshToken entity = new RefreshToken();
+        entity.setUsername(username);
+        entity.setToken(refreshToken);
+        entity.setExpiryDate(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRY).toInstant());
+        refreshTokenRepository.save(entity);
+    }
+
+    // Validate refresh token
+    public boolean validateRefreshToken(String token) {
         try {
-            Jwts.parser()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token);  // throws if invalid
-            return true;
+            Jwts.parser().setSigningKey(key).build().parseClaimsJws(token);
+            return refreshTokenRepository.findByToken(token).isPresent();
         } catch (JwtException e) {
-            // invalid token
             return false;
         }
     }
+
 
     // Remove token from in-memory store (logout)
     public boolean invalidateToken(String token) {
@@ -99,52 +127,7 @@ public class TokenService {
             return null; // or throw a custom exception if preferred
         }
     }
-    // generate refresh token and save
-    public RefreshToken createRefreshToken(String username) {
-        RefreshToken refreshToken = new RefreshToken();
-        refreshToken.setToken(UUID.randomUUID().toString());
-        refreshToken.setUsername(username);
-        refreshToken.setExpiryDate(Instant.now().plusSeconds(86400)); // 1 day
 
-        return refreshTokenRepository.save(refreshToken);
-    }
-    public String generateRefreshToken(String username) {
-        String refreshToken = Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000)) // 7 days
-                .signWith(key)
-                .compact();
-
-        return refreshToken;
-    }
-
-    // Save refresh token in DB
-    public void storeRefreshToken(String username, String refreshToken) {
-        RefreshToken entity = new RefreshToken();
-        entity.setUsername(username);
-        entity.setToken(refreshToken);
-        entity.setExpiryDate(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000).toInstant());
-        refreshTokenRepository.save(entity);
-    }
-    // generate new access token
-    public String generateAccessToken(String username) {
-        return Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 3600_000)) // 1 hour
-                .signWith(key)
-                .compact();
-    }
-    // Validate refresh token
-    public boolean validateRefreshToken(String token) {
-        try {
-            Jwts.parser().setSigningKey(key).build().parseClaimsJws(token);
-            return refreshTokenRepository.findByToken(token).isPresent();
-        } catch (JwtException e) {
-            return false;
-        }
-    }
 
 
     public String getUsernameFromToken(String token) {
@@ -155,5 +138,6 @@ public class TokenService {
 
 
 }
+
 
 

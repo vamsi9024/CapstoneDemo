@@ -28,24 +28,6 @@ public class LogoutController {
         this.tokenService = tokenService;
     }
 
-//    @Operation(summary = "Logout and invalidate token")
-//    @PostMapping("/logout")
-//    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
-//        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-//            return ResponseEntity
-//                    .badRequest()
-//                    .body(new AuthResponse("Missing or invalid Authorization header"));
-//        }
-//        String token = authHeader.substring(7);
-//        if (!tokenService.validateToken(token)) {
-//            return ResponseEntity
-//                    .status(HttpStatus.UNAUTHORIZED)
-//                    .body(new ErrorResponse("Invalid or expired token"));
-//        }
-//        tokenService.invalidateToken(token);
-//        return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
-//    }
-
     @Operation(summary = "Logout and invalidate token")
     @PostMapping("/logout")
     public ResponseEntity<Map<String, String>> logout(
