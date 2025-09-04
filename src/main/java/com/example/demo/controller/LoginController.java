@@ -1,7 +1,6 @@
 package com.example.demo.controller;
 
 
-import com.example.demo.exception.GlobalExceptionHandler;
 import com.example.demo.exception.InvalidCredentialsException;
 import com.example.demo.model.AuthRequest;
 import com.example.demo.model.AuthResponse;
@@ -21,6 +20,10 @@ import org.springframework.http.ResponseEntity;
 //import org.springframework.web.ErrorResponse;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
+
+import java.util.Map;
 
 
 @RestController
@@ -42,6 +45,7 @@ public class LoginController {
     }
 
     @Operation(summary = "Login and get JWT token")
+    @RateLimiter(name = "loginLimiter", fallbackMethod = "rateLimitFallback") // Add RateLimiter
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody User req, HttpServletResponse response) {
         log.info("Login attempt for username='{}'", req.getUsername());
@@ -77,6 +81,11 @@ public class LoginController {
                     log.warn("User '{}' not found", req.getUsername());
                     return new InvalidCredentialsException("User not registered");
                 });
+    }
+    public ResponseEntity<Map<String, String>> rateLimitFallback(User req, HttpServletResponse response, RequestNotPermitted ex) {
+        return ResponseEntity
+                .status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(Map.of("error", "Too many failed login attempts. Please try again later."));
     }
 
 
