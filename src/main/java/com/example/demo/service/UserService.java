@@ -37,14 +37,17 @@ public class UserService implements UserDetailsService{
         return "New user created successfully: " + user.getUsername();
     }
 
-    public List<User> getUsers() {
-        return userRepository.findAll();
-    }
+
 
     public Optional<User> findByUsername(String username) {
         return Optional.ofNullable(userRepository.findByUsername(username));
 
     }
+    public List<User> getUsers()
+    {
+        return userRepository.findAll();
+    }
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
